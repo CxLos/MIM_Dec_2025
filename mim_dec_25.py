@@ -33,12 +33,12 @@ from oauth2client.service_account import ServiceAccountCredentials
 # print('System Version:', sys.version)
 # =================================== DATA ==================================== #
 
-print("="*50)
-print("PYTHON INTERPRETER DEBUG INFO:")
-print(f"Python executable: {sys.executable}")
-print(f"Python version: {sys.version}")
-print(f"Python path: {sys.path[0]}")
-print("="*50)
+# print("="*50)
+# print("PYTHON INTERPRETER DEBUG INFO:")
+# print(f"Python executable: {sys.executable}")
+# print(f"Python version: {sys.version}")
+# print(f"Python path: {sys.path[0]}")
+# print("="*50)
 
 current_dir = os.getcwd()
 current_file = os.path.basename(__file__)
@@ -80,10 +80,10 @@ df = data.copy()
 # df = df[df['Date of Activity'].dt.month == 7]
 
 # Get the reporting month:
-int_month = 10
+int_month = 11
 mo = "Oct"
-report_month = datetime(2025, 10, 1).strftime("%B")
-report_year = datetime(2025, 10, 1).year
+report_month = datetime(2025, 11, 1).strftime("%B")
+report_year = datetime(2025, 11, 1).year
 
 # Strip whitespace from string entries in the whole DataFrame
 for col in df.select_dtypes(include='object').columns:
@@ -145,6 +145,7 @@ df.rename(
         # ----------------------------------------
         "Birthdate" : "Birthdate",
         "Age" : "Age",
+        "Age range" : "Age_Range",
         "Gender" : "Gender",
         "Race" : "Ethnicity",
         "Topics of Interest" : "Interest",
@@ -216,10 +217,13 @@ df['Ethnicity'] = (
         .astype(str)
         .str.strip()
         .replace({
+            "": "N/A", 
+            "Group search": "N/A", 
             "Hispanic/Latino": "Hispanic/ Latino", 
+            "Hispanic": "Hispanic/ Latino", 
             "White": "White/ European Ancestry", 
-            "Group search": "N/A", 
-            "Group search": "N/A", 
+            "Black": "Black/ African American", 
+            "black": "Black/ African American", 
         })
 )
 
@@ -305,7 +309,7 @@ race_pie=px.pie(
 
 # ------------------------------- Gender Distribution ---------------------------- #
 
-# print("Gender Unique Before:", df['Gender'].unique().tolist())
+print("Gender Unique Before:", df['Gender'].unique().tolist())
 
 gender_unique =[
     'Male', 
@@ -322,7 +326,10 @@ df['Gender'] = (
         .astype(str)
             .str.strip()
             .replace({
+                "": "N/A", 
                 "Group search": "N/A", 
+                "male": "Male", 
+                "female": "Female", 
             })
 )
 
@@ -410,10 +417,10 @@ gender_pie=px.pie(
 
 # ------------------------------- Age Distribution ---------------------------- #
 
-print("Age null:", df['Age'].isnull().sum())
+# print("Age null:", df['Age'].isnull().sum())
+print("Age Unique Before:", df['Age'].unique().tolist())
 
 df['Age'] = pd.to_numeric(df['Age'], errors='coerce')
-# print("Age Unique Before:", df['Age'].unique().tolist())
 
 # # Define a function to categorize ages into age groups
 def categorize_age(age):
@@ -522,7 +529,7 @@ age_bar=px.bar(
     bargroupgap=0,  # Reduce space between individual bars in groups
 ).update_traces(
     textposition='auto',
-    hovertemplate='<b>Age:</b>: %{label}<br><b>Count</b>: %{y}<extra></extra>'
+    hovertemplate='<b>Age</b>: %{label}<br><b>Count</b>: %{y}<extra></extra>'
 )
 
 age_pie = px.pie(
