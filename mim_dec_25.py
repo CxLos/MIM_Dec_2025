@@ -27,7 +27,7 @@ from dash import dcc, html, dash_table
 import json
 import base64
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 # 'data/~$bmhc_data_2024_cleaned.xlsx'
 # print('System Version:', sys.version)
@@ -59,11 +59,11 @@ encoded_key = os.getenv("GOOGLE_CREDENTIALS")
 
 if encoded_key:
     json_key = json.loads(base64.b64decode(encoded_key).decode("utf-8"))
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(json_key, scope)
+    creds = Credentials.from_service_account_info(json_key, scopes=scope)
 else:
     creds_path = r"C:\Users\CxLos\OneDrive\Documents\BMHC\Data\bmhc-timesheet-4808d1347240.json"
     if os.path.exists(creds_path):
-        creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
+        creds = Credentials.from_service_account_file(creds_path, scopes=scope)
     else:
         raise FileNotFoundError("Service account JSON file not found and GOOGLE_CREDENTIALS is not set.")
 
@@ -80,10 +80,10 @@ df = data.copy()
 # df = df[df['Date of Activity'].dt.month == 7]
 
 # Get the reporting month:
-int_month = 11
-mo = "Oct"
-report_month = datetime(2025, 11, 1).strftime("%B")
-report_year = datetime(2025, 11, 1).year
+int_month = 12
+mo = "Dec"
+report_month = datetime(2025, 12, 1).strftime("%B")
+report_year = datetime(2025, 12, 1).year
 
 # Strip whitespace from string entries in the whole DataFrame
 for col in df.select_dtypes(include='object').columns:
@@ -309,7 +309,7 @@ race_pie=px.pie(
 
 # ------------------------------- Gender Distribution ---------------------------- #
 
-print("Gender Unique Before:", df['Gender'].unique().tolist())
+# print("Gender Unique Before:", df['Gender'].unique().tolist())
 
 gender_unique =[
     'Male', 
@@ -418,7 +418,7 @@ gender_pie=px.pie(
 # ------------------------------- Age Distribution ---------------------------- #
 
 # print("Age null:", df['Age'].isnull().sum())
-print("Age Unique Before:", df['Age'].unique().tolist())
+# print("Age Unique Before:", df['Age'].unique().tolist())
 
 df['Age'] = pd.to_numeric(df['Age'], errors='coerce')
 
@@ -1785,7 +1785,7 @@ html.Div(
             dash_table.DataTable(
                 id='applications-table',
                 data=data,
-                columns=columns,
+                columns=columns, # type: ignore
                 page_size=10,
                 sort_action='native',
                 filter_action='native',
@@ -1810,7 +1810,7 @@ html.Div(
                     'whiteSpace': 'normal',
                     'height': 'auto',
                 },
-                style_cell_conditional=[
+                style_cell_conditional=[ # type: ignore
                     # make the index column narrow and centered
                     {'if': {'column_id': '#'},
                     'width': '20px', 'minWidth': '60px', 'maxWidth': '60px', 'textAlign': 'center'},
